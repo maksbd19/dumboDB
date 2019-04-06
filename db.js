@@ -18,6 +18,8 @@ const set = (index, data) => {
     hash[index] = [];
   }
   hash[index].push(data);
+
+  commitDB();
 };
 
 //  remove a value from a particular index
@@ -57,11 +59,18 @@ const readDB = () => {
       }
     }
     try {
-      data = JSON.parse(data);
+      //  validating data at the first time read
+      data = data.toString();
+      if (data) {
+        data = JSON.parse(data);
+      } else {
+        data = {};
+      }
+
       //  hash is a constant so we can't directly assign the data
       //  we can assign properties by the way
       for (key in data) {
-        hash[key] = data[key]; // copies each property to the data object
+        if (data.hasOwnProperty(key)) hash[key] = data[key]; // copies each property to the data object
       }
       readTryCount = 0;
     } catch (e) {
@@ -97,5 +106,6 @@ readDB();
 
 //  exposing the getter and setters
 exports.get = get;
+exports.set = set;
 exports.pop = pop;
 exports.remove = remove;
