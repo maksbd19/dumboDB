@@ -8,15 +8,20 @@ const chalk = require('chalk');
 const {
     printWelcomeNote,
     parseLine,
-    prompt
-} = require("./helpers/console-helpers");
+    prompt,
+    unrecognized
+} = require("./helpers/console");
+
+const {
+    processCommand
+} = require("./helpers/command");
+
+const CMD = require("./constants");
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
-const log = console.log;
 
 printWelcomeNote();
 
@@ -25,11 +30,10 @@ rl.on('line', (line) => {
 
     const cmd = parseLine(line);
 
-    if (cmd.EXIT) {
-        console.log(chalk.blue("bye bye..."));
-        process.exit(0);
+    if (!cmd || !cmd.command) {
+        unrecognized(line);
     } else {
-        log(chalk.red(`Unrecognised command: ${line}`));
+        processCommand(cmd, line);
     }
 
     prompt();
