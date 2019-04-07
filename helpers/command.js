@@ -11,13 +11,29 @@ const database = {
     collection: null
 };
 
-const getCollectionPath = (name) => {
-    const base = path.join(__dirname, `../data/`);
-    return path.join(base, `${name}.dumbo`);
-}
+const getBaseDir = () => path.join(__dirname, `../data/`);
+
+const getCollectionPath = (name) => path.join(getBaseDir(), `${name}.dumbo`);
 
 const getCollectionBaseContent = () => {
     return null;
+}
+
+const getDate = (time) => {
+    const date = new Date(time);
+
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    const y = date.getFullYear();
+    const m = ("0" + (date.getMonth() + 1)).slice(-2);
+    const d = ("0" + date.getDate()).slice(-2);
+    const h = ("0" + date.getHours()).slice(-2);
+    const i = ("0" + date.getMinutes()).slice(-2);
+    const s = ("0" + date.getSeconds()).slice(-2);
+
+    return `${y}-${m}-${d} ${h}:${i}:${s}`
 }
 
 /**
@@ -35,6 +51,9 @@ const processCommand = (cmd, line, callback) => {
         case CMD.EXIT:
             _console.byebye();
             process.exit(0);
+            break;
+        case CMD.STAT:
+            getCollectionStat(callback);
             break;
         case CMD.USE:
             selectCollection(cmd.args, callback);
@@ -100,8 +119,75 @@ const createCollection = (args, callback) => {
 
         return callback();
     });
+}
 
+const getCollectionStat = (callback) => {
 
+    const baseDir = getBaseDir();
+
+    fs.readdir(baseDir, (err, files) => {
+
+        if (err) {
+            _console.yell(`Unable to prepare stat`);
+        } else {
+            if (files.length === 0) {
+                _console.display("No collection found");
+                return callback();
+            } else {
+
+                const stats = [];
+
+                const getFileStat = (i, cb) => {
+                    if (i < 0) {
+                        return cb();
+                    }
+
+                    const fileName = files[i];
+                    const file = path.join(baseDir, fileName);
+
+                    fs.stat(file, (err, stat) => {
+                        if (err) {
+                            _console.error(err);
+                        }
+                        stats.push({
+                            name: fileName,
+                            stat: stat
+                        });
+
+                        return getFileStat(--i, cb);
+                    });
+                }
+
+                getFileStat(files.length - 1, () => {
+
+                    const head = [
+                        'Name',
+                        'Size',
+                        'Last Modified'
+                    ];
+
+                    const size = [20, 10, 25];
+
+                    const data = [];
+
+                    for (let i = 0; i < stats.length; i++) {
+
+                        data.push([
+                            stats[i].name.slice(0, stats[i].name.length - 6),
+                            stats[i].stat.size,
+                            getDate(stats[i].stat.mtime),
+                        ]);
+                    }
+
+                    _console.table(head, size, data);
+
+                    return callback();
+                });
+
+            }
+        }
+
+    });
 }
 
 const parseCommand = (parts) => {
@@ -128,6 +214,9 @@ const parseMetaCommand = (parts) => {
     switch (commandPart) {
         case 'EXIT':
             command = CMD.EXIT;
+            break;
+        case 'STAT':
+            command = CMD.STAT;
             break;
     };
 

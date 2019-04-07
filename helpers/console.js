@@ -3,6 +3,7 @@
  */
 
 const chalk = require("chalk");
+const Table = require('cli-table2');
 
 const {
     CMD
@@ -53,6 +54,21 @@ const byebye = () => console.log(chalk.blue("bye bye..."));
 const yell = (statement) => console.log(chalk.magenta(statement));
 const error = (...args) => console.log(chalk.red(args));
 const success = (...args) => console.log(chalk.green(args));
+const display = (data) => console.log(chalk.white(data));
+
+const table = (head, colWidths, data) => {
+    const table = new Table({
+        head: head,
+        colWidths: colWidths
+    });
+
+    for (let i = 0; i < data.length; i++) {
+        table.push(data[i]);
+    }
+
+    display(table.toString());
+
+}
 
 exports.printWelcomeNote = printWelcomeNote
 exports.parseLine = parseLine;
@@ -62,3 +78,5 @@ exports.byebye = byebye;
 exports.yell = yell;
 exports.error = error;
 exports.success = success;
+exports.display = display;
+exports.table = table;

@@ -5,15 +5,17 @@
 const CMD = Object.freeze({
     INVALID: -1,
     EXIT: 1,
-    USE: 11,
-    CREATE: 12,
-    DROP: 14,
+    STAT: 2,
 
-    ALL: 100,
-    GET: 101,
-    SET: 102,
-    POP: 103,
-    REMOVE: 104,
+    USE: 100,
+    CREATE: 101,
+    DROP: 102,
+
+    ALL: 200,
+    GET: 201,
+    SET: 202,
+    POP: 203,
+    REMOVE: 204,
 });
 
 exports.CMD = CMD;
