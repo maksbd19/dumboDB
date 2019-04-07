@@ -16,7 +16,10 @@ const getBaseDir = () => path.join(__dirname, `../data/`);
 const getCollectionPath = (name) => path.join(getBaseDir(), `${name}.dumbo`);
 
 const getCollectionBaseContent = () => {
-    return null;
+
+    const page = Buffer.alloc(16 * 1024, 0, 'hex'); //  16KB per page
+
+    return page;
 }
 
 const getDate = (time) => {
@@ -81,7 +84,7 @@ const selectCollection = (args, callback) => {
             _console.yell(`Unable to load collection ${collectionName}`);
             _console.yell(`You can create a new collection using command: CREATE COLLECITON ${collectionName}`);
         } else {
-            _console.success(`Collection ${collectionName} created successfully`);
+            _console.success(`Collection ${collectionName} selected`);
         }
         return callback();
     });
@@ -109,14 +112,13 @@ const createCollection = (args, callback) => {
     const collectionFilePath = getCollectionPath(collectionName);
     const data = getCollectionBaseContent();
 
-    fs.writeFile(collectionFilePath, data, (err) => {
-        if (err) {
-            _console.yell("unable to create collection");
-            _console.error(err);
-        } else {
-            _console.success(`Collection ${collectionName} created successfully.`);
-        }
+    const stream = fs.createWriteStream(collectionFilePath);
 
+    stream.write(data);
+    stream.end();
+
+    stream.on("finish", () => {
+        _console.success(`Collection ${collectionName} created successfully.`);
         return callback();
     });
 }
