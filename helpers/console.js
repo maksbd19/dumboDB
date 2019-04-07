@@ -4,7 +4,13 @@
 
 const chalk = require("chalk");
 
-const CMD = require("../constants").CMD;
+const {
+    CMD
+} = require("../constants");
+
+const {
+    parseCommand
+} = require("./command");
 
 const printWelcomeNote = () => {
     console.log("Welcome to dumbuDB cli.");
@@ -30,42 +36,13 @@ const parseLine = (line) => {
 
     const parts = line
         .split(" ")
-        .map(i => i.trim().toUpperCase());
-    let command;
+        .map(i => i.trim());
 
-    if (parts.length > 0 && parts[0].indexOf(".") === 0) {
-        command = parseMetaCommand(parts);
-    } else if (parts.length > 0) {
-        command = parseQuery(line);
-    } else {
-        command = {
-            command: CMD.INVALID
-        }
-    }
+    parts[0] = parts[0].toUpperCase();
+
+    const command = parseCommand(parts);
 
     return command;
-}
-
-const parseMetaCommand = (parts) => {
-    const commandPart = parts[0].substr(1, parts[0].length);
-    let command;
-
-    switch (commandPart) {
-        case 'EXIT':
-            command = CMD.EXIT;
-            break;
-    };
-
-    const cmd = {
-        command: command,
-        args: []
-    };
-
-    return cmd;
-}
-
-const parseQuery = (cmd) => {
-
 }
 
 const prompt = () => process.stdout.write("dd > ");
@@ -73,9 +50,15 @@ const prompt = () => process.stdout.write("dd > ");
 const unrecognized = (line) => console.log(chalk.red(`Unrecognized command: ${line}`));
 
 const byebye = () => console.log(chalk.blue("bye bye..."));
+const yell = (statement) => console.log(chalk.magenta(statement));
+const error = (...args) => console.log(chalk.red(args));
+const success = (...args) => console.log(chalk.green(args));
 
 exports.printWelcomeNote = printWelcomeNote
 exports.parseLine = parseLine;
 exports.prompt = prompt;
 exports.unrecognized = unrecognized;
 exports.byebye = byebye;
+exports.yell = yell;
+exports.error = error;
+exports.success = success;

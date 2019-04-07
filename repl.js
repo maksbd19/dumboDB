@@ -23,7 +23,7 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-printWelcomeNote();
+// printWelcomeNote();
 
 
 rl.on('line', (line) => {
@@ -32,9 +32,10 @@ rl.on('line', (line) => {
 
     if (!cmd || !cmd.command) {
         unrecognized(line);
+        prompt();
     } else {
-        processCommand(cmd, line);
+        processCommand(cmd, line, () => {
+            prompt();
+        });
     }
-
-    prompt();
 });
